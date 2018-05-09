@@ -1,0 +1,2 @@
+twisted==18.4.0
+logbook==1.3.3

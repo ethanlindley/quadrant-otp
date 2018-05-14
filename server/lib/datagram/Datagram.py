@@ -55,13 +55,14 @@ class Datagram:
             self.add_uint8(int(bool))
 
     def add_string(self, string):
-        if len(string) <= 65535:
+        if len(string) <= uint_16[1]:
             self.add_uint16(len(string))
             self.append_data(string)
 
     def add_string32(self, string32):
-        self.add_uint32(len(string))
-        self.append_data(string)
+        if len(string) <= uint_32[1]:
+            self.add_uint32(len(string))
+            self.append_data(string)
 
     def add_z_string(self, z_string):
         # TODO
@@ -74,10 +75,28 @@ class Datagram:
                 string = string + '0'
         elif len(string) > size:
             # truncate the string
-            string = ''
-        else:
-            # TODO
-            pass
+            string = string[:size]
+        
+        # i'm not entirely sure if this implementation is correct or not
+        if size >= int_8[0] and size <= int_8[1]:
+            self.add_int8(len(string))
+            self.append_data(string)
+        elif size >= int_16[0] and size <= int_16[1]:
+            self.add_int16(len(string))
+            self.append_data(string)
+        elif size >= int_32[0] and size <= int_32[1]:
+            self.add_int32(len(string))
+            self.append_data(string)
+        elif size >= int_64[0] and size <= int_64[1]:
+            self.add_int64(len(string))
+            self.append_data(string)
+        elif size >= uint_8[0] and size <= uint_8[1]:
+            self.add_uint8(len(string))
+            self.append_data(string)
+        elif size >= uint_16[0] and size <= uint_16[1]:
+            self.add_string(string)
+        elif size >= uint_32[0] and size <= uint_32[1]:
+            self.add_string32(string)
     
     def add_wstring(self, wstring):
         # TODO

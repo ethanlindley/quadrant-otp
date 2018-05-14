@@ -13,8 +13,6 @@ class DatagramIterator:
         return self.get_uint8() != 0
 
     def get_string(self):
-        str_len = self.get_uint16()
-
         if self.index < self.dg.get_length():
             data = self.dg.get_data()
             temp = data[self.index]
@@ -22,8 +20,6 @@ class DatagramIterator:
             return temp
 
     def get_string32(self):
-        str_len = self.get_uint32()
-
         if self.index < self.dg.get_length():
             data = self.dg.get_data()
             temp = data[self.index]

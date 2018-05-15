@@ -164,3 +164,13 @@ class DatagramIterator:
             temp = struct.unpack('>f', data[self.index])
             self.index += 1
             return temp[0]
+
+    def get_remaining_size(self):
+        if self.index < self.dg.get_length():
+            temp = self.dg.get_data()
+            data = []
+            i = self.index
+            while(i < self.dg.get_length()):
+                data.append(temp[i])
+                i += 1
+            return bytes(data)

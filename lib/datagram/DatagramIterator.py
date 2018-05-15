@@ -1,5 +1,5 @@
 import struct
-from Datagram import Datagram
+from .Datagram import Datagram
 
 
 class DatagramIterator:

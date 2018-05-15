@@ -24,8 +24,8 @@ class Datagram:
     A datagram is itself headerless; it is simple a collection of data elements.    
     """
 
-    def __init__(self, data=[]):
-        self.dg = data
+    def __init__(self, data=None):
+        self.dg = data if data is not None else []
 
     def reset(self):
         self.dg = []

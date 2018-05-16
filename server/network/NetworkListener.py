@@ -1,7 +1,7 @@
 from panda3d.core import QueuedConnectionListener, QueuedConnectionReader, ConnectionWriter, PointerToConnection, NetAddress
 from direct.task import Task
+from direct.distributed.PyDatagram import PyDatagram
 
-from lib.datagram.Datagram import Datagram
 from lib.logging.Logger import Logger
 from .NetworkManager import NetworkManager
 
@@ -23,6 +23,7 @@ class NetworkListener(NetworkManager):
         self.cw = ConnectionWriter(self, 0)
 
     def setup_socket(self):
+        # make sure a socket isn't already opened
         if self.socket is None:
             try:
                 self.socket = self.openTCPServerRendezvous(self.host_addr, self.port, self.backlog)
@@ -51,10 +52,11 @@ class NetworkListener(NetworkManager):
     def read_incoming(self, task):
         # TODO - poll for incoming data
         if self.qcr.dataAvailable():
-            dg = Datagram()  # catch the incoming data
+            dg = PyDatagram()  # catch the incoming data
+
+            # check the return value; if we were threaded, 
+            # someone could've snagged the data before we did
             if self.qcr.getData(dg):
-                # check the return value; if we were threaded, 
-                # someone could've snagged the data before we did
                 # TODO - handle incoming packets
                 pass
 

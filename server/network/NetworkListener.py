@@ -1,38 +1,38 @@
-from panda3d.core import (QueuedConnectionListener, QueuedConnectionManager, QueuedConnectionReader, ConnectionWriter, 
-PointerToConnection, NetAddress)
-from lib.datagram.Datagram import Datagram
+from panda3d.core import QueuedConnectionListener, QueuedConnectionReader, ConnectionWriter, PointerToConnection, NetAddress
 from direct.task import Task
+
+from lib.datagram.Datagram import Datagram
 from lib.logging.Logger import Logger
 from .NetworkManager import NetworkManager
 
 
-class NetworkListener:
+class NetworkListener(NetworkManager):
     notify = Logger('NetworkListener')
 
-    def __init__(self, host_addr, port, backlog):
+    def __init__(self, host_addr, port, backlog=10000):
         self.host_addr = host_addr
         self.port = port
-        self.backlog = backlog
+        self.backlog = backlog  # if the backlog exceeds supplied value, something is wrong
 
         self.socket = None
         self.active_connections = []
         
-        self.nwm = QueuedConnectionManager()
-        self.qcl = QueuedConnectionListener.__init__(self.nwm, 0)
-        self.qcr = QueuedConnectionReader.__init__(self.nwm, 0)
-        self.cw = ConnectionWriter.__init__(self.nwm, 0)
+        NetworkManager.__init__(self)
+        self.qcl = QueuedConnectionListener(self, 0)
+        self.qcr = QueuedConnectionReader(self, 0)
+        self.cw = ConnectionWriter(self, 0)
 
-    def setup_server(self):
+    def setup_socket(self):
         if self.socket is None:
             try:
-                self.socket = self.nwm.openTCPSeverRendezvous(self.host_addr, self.port, self.backlog)
+                self.socket = self.openTCPServerRendezvous(self.host_addr, self.port, self.backlog)
                 self.qcl.addConnection(self.socket)
-                notify.info("socket now listenening on %s" % (str(self.port)))
+                self.logger.info("socket now listening on %s" % (str(self.port)))
 
                 taskMgr.add(self.listen_incoming, self.get_uid("listen-incoming"))
                 taskMgr.add(self.read_incoming, self.get_uid("read-incoming"))
             except:
-                raise Exception("unable to open socket on port %s" % (str(self.port)))
+                raise StandardError("unable to open port on socket %s:%s -- is the port open?" % (self.host_addr, str(self.port)))
 
     def listen_incoming(self, task):
         # poll for any incoming connections to the server
@@ -59,6 +59,3 @@ class NetworkListener:
                 pass
 
         return task.cont
-
-    def get_uid(self, name):
-        return "%s-%d" % (name, id(self))

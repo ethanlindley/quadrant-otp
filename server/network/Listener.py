@@ -1,5 +1,5 @@
-from panda3d.core import QueuedConnectionListener, QueuedConnectionManager, QueuedConnectionReader, ConnectionWriter, PointerToConnection, NetAddress
-from direct.task.Task import Task
+from panda3d.core import (QueuedConnectionListener, QueuedConnectionManager, QueuedConnectionReader, 
+ConnectionWriter, PointerToConnection, NetAddress)
 
 from lib.logging.Logger import Logger
 
@@ -7,13 +7,15 @@ from lib.logging.Logger import Logger
 class Listener(QueuedConnectionManager):
     logger = Logger("network_listener")
 
-    def __init__(self, host_addr, port, backlog=10000):
+    def __init__(self, host_addr, port, participant, backlog=10000):
         self.host_addr = host_addr
         self.__port = port
+        self.participant = participant
         self.backlog = backlog  # if we're ignoring 10000 connection attempts, something is going wrong
 
         self.server_sock = None
         self.active_connections = []
+        self.participants = {}
 
         self.listen_task = None
         self.read_task = None
@@ -44,18 +46,27 @@ class Listener(QueuedConnectionManager):
                 new_conn = new_conn.p()
                 self.active_connections.append(new_conn)  # remember the connection
                 self.qcr.addConnection(new_conn)  # begin reading the connection
-                self.logger.warn("new connection from %s" % net_addr)
+                self.handle_connection(rendezvous, net_addr, new_conn)
 
-        return Task.cont
+        return task.cont
 
     def poll_incoming_data(self, task):
         if self.qcr.dataAvailable():
             dg = NetDatagram()
             if self.qcr.getData(dg):
-                self.handle_data(dg)
+                self.handle_data(dg, dg.getConnection())
 
         return Task.cont
 
-    def handle_data(self, dg):
-        # TODO - handle data
-        pass
+    def handle_connection(self, rendezvous, addr, connection):
+        self.logger.warn("new connection from %s" % addr)
+        participant = self.participant(self, rendezvous, addr, connection)
+        
+        if participant not in self.participants:
+            participant.configure()
+            self.participants[participant.connection] = participant
+            self.qcr.addConnection(participant.connection)
+
+    def handle_data(self, dg, connection):
+        if connection in self.participants:
+            self.participants[connection].add_data(dg)

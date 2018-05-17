@@ -1,5 +1,4 @@
 from panda3d.core import QueuedConnectionManager, QueuedConnectionReader, ConnectionWriter, NetDatagram
-from direct.task.Task import Task
 
 from lib.logging.Logger import Logger
 
@@ -36,7 +35,7 @@ class Connector(QueuedConnectionManager):
             if self.qcr.getData(dg):
                 self.handle_data(dg)
 
-        return Task.cont
+        return task.cont
 
     def handle_data(self, dg):
         # TODO - handle data

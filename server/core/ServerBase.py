@@ -7,13 +7,16 @@ from lib.logging.Logger import Logger
 class ServerBase(QueuedConnectionManager):
     logger = Logger("server_base")
 
-    def __init__(self, host, listen_port, backlog=10000):
+    def __init__(self, host, listen_port, interface, backlog=10000):
         self.host = host
         self.listen_port = listen_port  # port we want to listen on
         self.backlog = backlog
 
         self.socket = None
         self.active_connections = []
+
+        self.interface = None
+        self.interfaces = {}
 
         self.listen_task = None
         self.read_task = None
@@ -45,8 +48,7 @@ class ServerBase(QueuedConnectionManager):
 
             if self.cListener.getNewConnection(rendezvous, net_addr, new_conn):
                 new_conn = new_conn.p()
-                self.active_connections.append(new_conn)  # remember the connection
-                self.cReader.addConnection(new_conn)  # begin reading the connection
+                self.handle_suggestion(rendezvous, net_addr, new_conn)
         
         return task.cont
 
@@ -62,8 +64,13 @@ class ServerBase(QueuedConnectionManager):
         return task.cont
 
     def handle_data(self, dg, connection):
-        # inheritors will handle the data specifically to their needs
+        # to be overridden by inheritors
         pass
+
+    def handle_suggestion(self, rendezvous, net_addr, new_conn):
+        if self.interfaces[new_conn] is None:
+            self.interface = self.interface(rendezvous, net_addr, new_conn)  # instantiate a new interface
+            self.interfaces[new_conn] = self.interface  # keep track of the current interfaces
 
     def shutdown(self):
         if self.listen_task or self.read_task:

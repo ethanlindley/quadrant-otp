@@ -44,7 +44,7 @@ class SocketConnector(QueuedConnectionManager):
         return task.cont
 
     def handle_data(self, dg, connection):
-        # inheritors will handle the data specifically to their needs
+        # to be overridden by inheritors
         pass
 
     def shutdown(self):

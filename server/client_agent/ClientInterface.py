@@ -1,0 +1,21 @@
+from panda3d.core import NetDatagram
+from direct.distributed.PyDatagramIterator import PyDatagramIterator
+
+from server.core.InterfaceObject import InterfaceObject
+from lib.logging.Logger import Logger
+
+
+class ClientInterface(InterfaceObject):
+    logger = Logger("client_interface")
+
+    def __init__(self, parent, rendezvous, net_addr, conn):
+        InterfaceObject.__init__(self, parent, rendezvous, net_addr, conn)
+
+    def handle_datagram(self, dg):
+        dgi = PyDatagramIterator(dg)
+
+        # make sure the datagram contains data
+        if dgi.getRemainingSize() is None:
+            return
+        msg = dgi.getUint8()
+        self.logger.debug("received new message - %s" % str(msg))

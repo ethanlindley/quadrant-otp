@@ -69,7 +69,7 @@ class ServerBase(QueuedConnectionManager):
 
     def handle_suggestion(self, rendezvous, net_addr, new_conn):
         if self.interfaces[new_conn] is None:
-            self.interface = self.interface(rendezvous, net_addr, new_conn)  # instantiate a new interface
+            self.interface = self.interface(self, rendezvous, net_addr, new_conn)  # instantiate a new interface
             self.interfaces[new_conn] = self.interface  # keep track of the current interfaces
 
     def shutdown(self):

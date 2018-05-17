@@ -37,7 +37,23 @@ class ServerBase(QueuedConnectionManager):
         self.read_task = taskMgr.add(self.poll_incoming_data, "read-task")
 
     def poll_incoming_suggestions(self, task):
-        pass
+        if self.cListener.newConnectionAvailable():
+            rendezvous = PointerToConnection()
+            net_addr = NetAddress()
+            new_conn = PointerToConnection()
+
+            if self.cListener.getNewConnection(rendezvous, net_addr, new_conn):
+                new_conn = new_conn.p()
+                self.active_connections.append(new_conn)  # remember the connection
+                self.cReader.addConnection(new_conn)  # begin reading the connection
 
     def poll_incoming_data(self, task):
-        pass
+        if self.cReader.getData():
+            dg = NetDatagram()
+
+            # make sure the dg actually contains data
+            if self.cReader.dataAvailable(dg):
+                # TODO - handle incoming packets
+                pass
+        
+        return task.cont

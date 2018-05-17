@@ -61,3 +61,19 @@ class ServerBase(QueuedConnectionManager):
     def handle_data(self, dg):
         # inheritors will handle the data specifically to their needs
         pass
+
+    def shutdown(self):
+        if self.listen_task or self.read_task:
+            # first, let's terminate all the current connections to the listener
+            for client in self.active_connections:
+                self.cReader.removeConnection(client)
+            self.active_connections = []  # reset the connection list
+
+            # end current running tasks
+            taskMgr.remove(self.listen_task)
+            taskMgr.remove(self.read_task)
+            self.listen_task = None
+            self.read_task = None
+
+            self.closeConnection(self.socket)  # close our listener
+            self.socket = None

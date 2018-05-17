@@ -45,3 +45,11 @@ class SocketConnector(QueuedConnectionManager):
     def handle_data(self, dg):
         # inheritors will handle the data specifically to their needs
         pass
+
+    def shutdown(self):
+        if self.read_task:
+            taskMgr.remove(self.read_task)
+            self.read_task = None
+            
+            self.cReader.removeConnection(self.socket)
+            self.socket = None

@@ -30,7 +30,6 @@ class ConnectionListener(NetworkManager):
             try:
                 self.socket = self.openTCPServerRendezvous(self.host_addr, self.port, self.backlog)
                 self.qcl.addConnection(self.socket)
-                self.logger.info("socket now listening on %s" % (str(self.port)))
 
                 self.listen_task = taskMgr.add(self.listen_incoming, self.get_uid("listen-incoming"))
                 self.listen_task = taskMgr.add(self.read_incoming, self.get_uid("read-incoming"))

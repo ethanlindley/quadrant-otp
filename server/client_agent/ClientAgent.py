@@ -11,5 +11,6 @@ class ClientAgent(ConnectionListener, NetworkConnector):
         NetworkConnector.__init__(self, host_addr, md_port)  # connect to message director socket
 
     def setup_server(self):
-        ConnectionListener.setup(self)
-        NetworkConnector.setup(self)
+        ConnectionListener.setup_socket(self)
+        NetworkConnector.connect(self)
+        self.logger.info("socket online")

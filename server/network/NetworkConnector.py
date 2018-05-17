@@ -24,10 +24,8 @@ class NetworkConnector(NetworkManager):
             try:
                 self.socket = self.openTCPClientConnection(self.host_addr, self.port, self.timeout)
                 self.qcr.addConnection(self.socket)
-                self.logger.debug("successfully connected to %s:%s" % (self.host_addr, str(self.port)))
             except:
                 raise Exception("unable to connect to %s:%s" % (self.host_addr, str(self.port)))
-                return
         
         self.read_task = taskMgr.add(self.read_incoming, self.get_uid("read-incoming"))
 

@@ -6,7 +6,8 @@ class MessageDirector(ConnectionListener):
     logger = Logger("MessageDirector")
 
     def __init__(self, host_addr, md_port):
-        ConnectionListener.__init__(host_addr, md_port)
+        ConnectionListener.__init__(self, host_addr, md_port)
 
     def setup_server(self):
-        ConnectionListener.setup(self)
+        ConnectionListener.setup_socket(self)
+        self.logger.info("socket online")

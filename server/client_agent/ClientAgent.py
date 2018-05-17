@@ -17,8 +17,10 @@ class ClientAgent(ServerBase, SocketConnector):
         SocketConnector.configure(self)  # once the socket is opened, open another socket and connect to the MD
         self.logger.info("server started")
 
-    def handle_data(self, dg):
-        # TODO - handle any incoming data
-        dgi = DatagramIterator(dg)
+    def handle_data(self, dg, connection):
+        dgi = PyDatagramIterator(dg)
+        # make sure the datagram contains data
         if dgi.getRemainingSize() is None:
             return
+        msg = dgi.getUint8()
+        self.logger.debug(msg)

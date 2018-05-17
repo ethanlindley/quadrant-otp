@@ -38,11 +38,12 @@ class SocketConnector(QueuedConnectionManager):
 
             # make sure the dg actually contains data
             if self.cReader.getData(dg):
-                self.handle_data(dg)
+                conn = dg.getConnection()
+                self.handle_data(dg, conn)
         
         return task.cont
 
-    def handle_data(self, dg):
+    def handle_data(self, dg, connection):
         # inheritors will handle the data specifically to their needs
         pass
 

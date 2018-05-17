@@ -1,5 +1,5 @@
 from panda3d.core import (QueuedConnectionManager, QueuedConnectionListener, QueuedConnectionReader, ConnectionWriter, 
-NetAddress, NetDatagram, DatagramIterator, PointerToConnection)
+NetAddress, NetDatagram, PointerToConnection)
 
 from lib.logging.Logger import Logger
 
@@ -56,11 +56,12 @@ class ServerBase(QueuedConnectionManager):
 
             # make sure the dg actually contains data
             if self.cReader.getData(dg):
-                self.handle_data(dg)
+                conn = dg.getConnection()
+                self.handle_data(dg, conn)
         
         return task.cont
 
-    def handle_data(self, dg):
+    def handle_data(self, dg, connection):
         # inheritors will handle the data specifically to their needs
         pass
 

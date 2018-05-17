@@ -47,6 +47,8 @@ class ServerBase(QueuedConnectionManager):
                 new_conn = new_conn.p()
                 self.active_connections.append(new_conn)  # remember the connection
                 self.cReader.addConnection(new_conn)  # begin reading the connection
+        
+        return task.cont
 
     def poll_incoming_data(self, task):
         if self.cReader.dataAvailable():

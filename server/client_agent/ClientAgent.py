@@ -1,3 +1,5 @@
+from panda3d.core import NetDatagram, DatagramIterator
+
 from server.core.ServerBase import ServerBase
 from server.core.SocketConnector import SocketConnector
 from lib.logging.Logger import Logger
@@ -17,4 +19,6 @@ class ClientAgent(ServerBase, SocketConnector):
 
     def handle_data(self, dg):
         # TODO - handle any incoming data
-        pass
+        dgi = DatagramIterator(dg)
+        if dgi.getRemainingSize() is None:
+            return

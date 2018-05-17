@@ -1,3 +1,5 @@
+from panda3d.core import NetDatagram, DatagramIterator
+
 from server.core.ServerBase import ServerBase
 from lib.logging.Logger import Logger
 
@@ -14,4 +16,6 @@ class MessageDirector(ServerBase):
 
     def handle_data(self, dg):
         # TODO - handle any incoming data
-        pass
+        dgi = DatagramIterator(dg)
+        if dgi.getRemainingSize() is None:
+            return

@@ -51,5 +51,5 @@ class SocketConnector(QueuedConnectionManager):
             taskMgr.remove(self.read_task)
             self.read_task = None
             
-            self.cReader.removeConnection(self.socket)
+            self.closeConnection(self.socket)  # close the reading socket
             self.socket = None

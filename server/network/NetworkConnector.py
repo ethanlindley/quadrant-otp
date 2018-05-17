@@ -39,10 +39,18 @@ class NetworkConnector(NetworkManager):
             # check the return value; if we were threaded, 
             # someone could've snagged the data before we did
             if self.qcr.getData(dg):
-                # TODO - handle incoming packets
-                pass
+                self.handle_data(dg)
 
         return task.cont
+
+    def handle_data(self, dg):
+        # make sure the received packet actually contains data
+        if dg.get_length() is None:
+            return
+        
+        di = DatagramIterator(dg)
+
+        # TODO - get data from datagram?
 
     def handle_datagram(self, sender, msg_type, dg):
         # properly handle any incoming packets to the server

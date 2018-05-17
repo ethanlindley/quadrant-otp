@@ -15,6 +15,9 @@ class ConnectionListener(NetworkManager):
 
         self.socket = None
         self.active_connections = []
+
+        self.listen_task = None
+        self.read_task = None
         
         NetworkManager.__init__(self)
         self.qcl = QueuedConnectionListener(self, 0)
@@ -29,8 +32,8 @@ class ConnectionListener(NetworkManager):
                 self.qcl.addConnection(self.socket)
                 self.logger.info("socket now listening on %s" % (str(self.port)))
 
-                taskMgr.add(self.listen_incoming, self.get_uid("listen-incoming"))
-                taskMgr.add(self.read_incoming, self.get_uid("read-incoming"))
+                self.listen_task = taskMgr.add(self.listen_incoming, self.get_uid("listen-incoming"))
+                self.listen_task = taskMgr.add(self.read_incoming, self.get_uid("read-incoming"))
             except:
                 raise StandardError("unable to open port on socket %s:%s -- is the port open?" % (self.host_addr, str(self.port)))
 
@@ -60,3 +63,16 @@ class ConnectionListener(NetworkManager):
                 pass
 
         return task.cont
+
+    def shutdown_socket(self):
+        # make sure that the tasks are running already
+        if self.read_task is not None and self.listen_task is not None:
+            taskMgr.remove(self.read_task)
+            taskMgr.remove(self.listen_task)
+
+            # terminate connection to all clients
+            for client in self.active_connections:
+                self.qcr.removeConnection(client)
+            self.active_connections = []  # reset the list of connections
+
+            self.closeConnection(socket)  # finally, let's close down the listener socket

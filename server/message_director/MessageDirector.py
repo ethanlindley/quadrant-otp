@@ -1,13 +1,13 @@
+from server.network.Listener import Listener
 from lib.logging.Logger import Logger
-from server.network.ConnectionListener import ConnectionListener
 
 
-class MessageDirector(ConnectionListener):
-    logger = Logger("MessageDirector")
+class MessageDirector(Listener):
+    logger = Logger("message_director")
 
-    def __init__(self, host_addr, md_port):
-        ConnectionListener.__init__(self, host_addr, md_port)
+    def __init__(self, host_addr, port, backlog=10000):
+        Listener.__init__(self, host_addr, port, backlog)
 
-    def setup_server(self):
-        ConnectionListener.setup_socket(self)
-        self.logger.info("socket online")
+    def setup(self):
+        Listener.configure(self)
+        self.logger.info("protocol online")

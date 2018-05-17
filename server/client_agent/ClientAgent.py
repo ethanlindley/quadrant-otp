@@ -1,16 +1,16 @@
+from server.network.Connector import Connector
+from server.network.Listener import Listener
 from lib.logging.Logger import Logger
-from server.network.ConnectionListener import ConnectionListener
-from server.network.NetworkConnector import NetworkConnector
 
 
-class ClientAgent(ConnectionListener, NetworkConnector):
-    logger = Logger("ClientAgent")
+class ClientAgent(Connector, Listener):
+    logger = Logger("client_agent")
 
     def __init__(self, host_addr, md_port, ca_port):
-        ConnectionListener.__init__(self, host_addr, ca_port)  # listen on a new socket
-        NetworkConnector.__init__(self, host_addr, md_port)  # connect to message director socket
+        Listener.__init__(self, host_addr, ca_port)
+        Connector.__init__(self, host_addr, md_port)
 
-    def setup_server(self):
-        ConnectionListener.setup_socket(self)
-        NetworkConnector.connect(self)
-        self.logger.info("socket online")
+    def setup(self):
+        Listener.configure(self)
+        Connector.configure(self)
+        self.logger.info("protocol online")

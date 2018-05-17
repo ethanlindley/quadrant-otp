@@ -1,5 +1,3 @@
-from panda3d.core import NetDatagram
-
 from lib.logging.Logger import Logger
 from server.network.ConnectionListener import ConnectionListener
 from server.network.NetworkConnector import NetworkConnector
@@ -15,4 +13,3 @@ class ClientAgent(ConnectionListener, NetworkConnector):
     def setup_server(self):
         ConnectionListener.setup(self)
         NetworkConnector.setup(self)
-

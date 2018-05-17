@@ -33,11 +33,11 @@ class SocketConnector(QueuedConnectionManager):
         self.read_task = taskMgr.add(self.poll_incoming_data, "read-task")
 
     def poll_incoming_data(self, task):
-        if self.cReader.getData():
+        if self.cReader.dataAvailable():
             dg = NetDatagram()
 
             # make sure the dg actually contains data
-            if self.cReader.dataAvailable(dg):
+            if self.cReader.getData(dg):
                 self.handle_data(dg)
         
         return task.cont

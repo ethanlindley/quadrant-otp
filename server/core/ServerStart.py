@@ -2,6 +2,8 @@ from panda3d.core import ConfigVariableString
 ConfigVariableString("window-type","none").setValue("none")
 from direct.showbase.ShowBase import ShowBase
 
+from server.message_director.MessageDirector import MessageDirector
+from server.client_agent.ClientAgent import ClientAgent
 from lib.logging.Logger import Logger
 
 
@@ -13,8 +15,12 @@ class ServerStart(ShowBase):
         self.start()
 
     def start(self):
-        # TODO - instantiate protocols
-        pass
+        # TODO - get server info from config
+        md = MessageDirector("127.0.0.1", 6667)
+        ca = ClientAgent("127.0.0.1", 6667, 6668)
+
+        md.setup()
+        ca.setup()
 
 
 start = ServerStart()

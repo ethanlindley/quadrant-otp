@@ -1,4 +1,5 @@
-from panda3d.core import QueuedConnectionManager, QueuedConnectionListener, QueuedConnectionReader, ConnectionWriter, NetAddress, NetDatagram, PointerToAddress
+from panda3d.core import (QueuedConnectionManager, QueuedConnectionListener, QueuedConnectionReader, ConnectionWriter, 
+NetAddress, NetDatagram, DatagramIterator, PointerToConnection)
 
 from lib.logging.Logger import Logger
 
@@ -48,12 +49,15 @@ class ServerBase(QueuedConnectionManager):
                 self.cReader.addConnection(new_conn)  # begin reading the connection
 
     def poll_incoming_data(self, task):
-        if self.cReader.getData():
+        if self.cReader.dataAvailable():
             dg = NetDatagram()
 
             # make sure the dg actually contains data
-            if self.cReader.dataAvailable(dg):
-                # TODO - handle incoming packets
-                pass
+            if self.cReader.getData(dg):
+                self.handle_data(dg)
         
         return task.cont
+
+    def handle_data(self, dg):
+        # inheritors will handle the data specifically to their needs
+        pass

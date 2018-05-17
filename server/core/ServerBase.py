@@ -1,5 +1,6 @@
 from panda3d.core import (QueuedConnectionManager, QueuedConnectionListener, QueuedConnectionReader, ConnectionWriter, 
 NetAddress, NetDatagram, PointerToConnection)
+from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
 from lib.logging.Logger import Logger
 
@@ -15,8 +16,8 @@ class ServerBase(QueuedConnectionManager):
         self.socket = None
         self.active_connections = []
 
-        self.interface = None
-        self.interfaces = {}
+        self.interface = interface
+        self.interface_objects = {}
 
         self.listen_task = None
         self.read_task = None
@@ -68,9 +69,16 @@ class ServerBase(QueuedConnectionManager):
         pass
 
     def handle_suggestion(self, rendezvous, net_addr, new_conn):
-        if self.interfaces[new_conn] is None:
-            self.interface = self.interface(self, rendezvous, net_addr, new_conn)  # instantiate a new interface
-            self.interfaces[new_conn] = self.interface  # keep track of the current interfaces
+        interface = self.interface(self, rendezvous, net_addr, new_conn)  # instantiate a new interface
+        if interface.connection not in self.interface_objects:
+            self.interface_objects[interface.connection] = interface
+            self.cReader.addConnection(interface.connection)
+
+    def get_interface_from_datagram(self, interface_channel):
+        for interface in self.interface_objects:
+            if interface.channel == interface_channel:
+                return interface
+        return None
 
     def shutdown(self):
         if self.listen_task or self.read_task:

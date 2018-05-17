@@ -8,8 +8,12 @@ from lib.logging.Logger import Logger
 class ClientInterface(InterfaceObject):
     logger = Logger("client_interface")
 
-    def __init__(self, parent, rendezvous, net_addr, conn):
-        InterfaceObject.__init__(self, parent, rendezvous, net_addr, conn)
+    def __init__(self, parent, rendezvous, net_addr, conn, our_channel=None):
+        InterfaceObject.__init__(self, parent, rendezvous, net_addr, conn, our_channel)
+
+    def setup(self):
+        if self.channel is None:
+            self.channel = self.parent.channel_allocator.allocate()
 
     def handle_datagram(self, dg):
         dgi = PyDatagramIterator(dg)

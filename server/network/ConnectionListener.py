@@ -1,13 +1,12 @@
-from panda3d.core import QueuedConnectionListener, QueuedConnectionReader, ConnectionWriter, PointerToConnection, NetAddress
-from direct.task import Task
-from direct.distributed.PyDatagram import PyDatagram
+from panda3d.core import QueuedConnectionListener, QueuedConnectionReader, ConnectionWriter, PointerToConnection, NetAddress, NetDatagram
+from direct.task.Task import Task
 
 from lib.logging.Logger import Logger
 from .NetworkManager import NetworkManager
 
 
-class NetworkListener(NetworkManager):
-    notify = Logger('NetworkListener')
+class ConnectionListener(NetworkManager):
+    notify = Logger("ConnectionListener")
 
     def __init__(self, host_addr, port, backlog=10000):
         self.host_addr = host_addr
@@ -50,9 +49,9 @@ class NetworkListener(NetworkManager):
         return task.cont
 
     def read_incoming(self, task):
-        # TODO - poll for incoming data
+        # poll for incoming data to the server
         if self.qcr.dataAvailable():
-            dg = PyDatagram()  # catch the incoming data
+            dg = NetDatagram()  # catch the incoming data
 
             # check the return value; if we were threaded, 
             # someone could've snagged the data before we did

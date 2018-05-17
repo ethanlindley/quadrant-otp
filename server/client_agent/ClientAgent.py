@@ -1,16 +1,28 @@
+from panda3d.core import NetDatagram, UniqueIdAllocator
+from direct.distributed.PyDatagramIterator import PyDatagramIterator
+
+from .ClientInterface import ClientInterface
+from server.core.ServerBase import ServerBase
+from server.core.SocketConnector import SocketConnector
 from lib.logging.Logger import Logger
-from server.network.ConnectionListener import ConnectionListener
-from server.network.NetworkConnector import NetworkConnector
 
 
-class ClientAgent(ConnectionListener, NetworkConnector):
-    logger = Logger("ClientAgent")
+class ClientAgent(ServerBase, SocketConnector):
+    logger = Logger("client_agent")
 
-    def __init__(self, host_addr, md_port, ca_port):
-        ConnectionListener.__init__(self, host_addr, ca_port)  # listen on a new socket
-        NetworkConnector.__init__(self, host_addr, md_port)  # connect to message director socket
+    def __init__(self, host, md_port, ca_port):
+        ServerBase.__init__(self, host, ca_port, ClientInterface)
+        SocketConnector.__init__(self, host, md_port)
 
-    def setup_server(self):
-        ConnectionListener.setup_socket(self)
-        NetworkConnector.connect(self)
-        self.logger.info("socket online")
+        self.channel_allocator = UniqueIdAllocator(1000000000, 1009999999)
+
+    def setup(self):
+        ServerBase.configure(self)
+        SocketConnector.configure(self)
+        self.logger.info("server started")
+
+    def handle_data(self, dg, connection):
+        dgi = PyDatagramIterator(dg)
+        interface = self.get_interface_from_datagram(dgi.getUint64())
+        dg = interface.handle_datagram()
+        self.cWriter.send(dg, connection)

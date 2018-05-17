@@ -1,6 +1,6 @@
 # quadrant-otp
 
-An attempt to emulate Disney's Online Theme Park server (commonly referred to as the OTP server), written in Python 2.7.
+Quadrant-OTP is an experimental server suite for Panda3D client applications, with inspiration from Disney Interactive Media Group's now-defunct Online Theme Park (OTP) server suite project, used in-house from 2001 - 2013.
 
 ## Requirements
 

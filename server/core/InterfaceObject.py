@@ -14,3 +14,11 @@ class InterfaceObject:
     def handle_datagram(self, dg):
         # to be overridden by inheritors
         pass
+
+    def register_for_channel(self, channel):
+        # TODO - register channel with MessageDirector
+        pass
+
+    def unregister_for_channel(self, channel):
+        # TODO - unregister channel from MessageDirector
+        pass

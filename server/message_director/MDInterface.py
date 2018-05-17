@@ -14,6 +14,7 @@ class MDInterface(InterfaceObject):
     def setup(self):
         if self.channel is None:
             self.channel = self.parent.channel_allocator.allocate()
+            self.register_for_channel(self.channel)
 
     def handle_datagram(self, dg):
         dgi = PyDatagramIterator(dg)

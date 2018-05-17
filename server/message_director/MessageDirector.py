@@ -18,6 +18,14 @@ class MessageDirector(ServerBase):
         ServerBase.configure(self)
         self.logger.info("server started")
 
+    def register_channel(self, channel):
+        # TODO - handle any requests to register a new channel to the MD
+        pass
+
+    def unregister_channel(self, channel):
+        # TODO - handle any requests to unregister a channel from the MD
+        pass
+
     def handle_data(self, dg, connection):
         dgi = PyDatagramIterator(dg)
         interface = self.get_interface_from_datagram(dgi.getUint64())

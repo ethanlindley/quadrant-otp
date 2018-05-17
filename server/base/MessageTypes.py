@@ -1,5 +1,3 @@
-# TODO - add server message types here
-
 from direct.showbase.PythonUtil import invertDictLossless
 
 BAD_CHANNEL_ID = 0

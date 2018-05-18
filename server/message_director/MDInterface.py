@@ -17,6 +17,7 @@ class MDInterface(InterfaceObject):
             self.register_for_channel(self.channel)
 
     def handle_datagram(self, dg):
+        # NOTE - incomplete method
         dgi = PyDatagramIterator(dg)
 
         # make sure the datagram contains data

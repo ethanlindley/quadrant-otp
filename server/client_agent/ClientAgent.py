@@ -24,5 +24,5 @@ class ClientAgent(ServerBase, SocketConnector):
     def handle_data(self, dg, connection):
         dgi = PyDatagramIterator(dg)
         interface = self.get_interface_from_datagram(dgi.getUint64())
-        dg = interface.handle_datagram()
+        dg = interface.handle_datagram(dg)
         self.cWriter.send(dg, connection)

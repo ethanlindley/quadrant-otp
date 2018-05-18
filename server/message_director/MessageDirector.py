@@ -12,7 +12,7 @@ class MessageDirector(ServerHandler):
     def configure(self):
         ServerHandler.configure(self)
         self.logger.info("server online")
-        self.handler = MDHandler()  # instantiate our handler
+        self.handler = MDHandler(self.host, self.port)  # instantiate our handler
 
     def handle_data(self, dg):
         self.handler.handle_packet(dg)

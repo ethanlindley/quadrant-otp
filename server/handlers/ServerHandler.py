@@ -19,8 +19,8 @@ class ServerHandler(QueuedConnectionManager):
 
         QueuedConnectionManager.__init__(self)
         self.cListener = QueuedConnectionListener(self, 0)
-        self.cReader = QueuedConnectionReader(self, 0)
-        self.cWriter = ConnectionWriter(self, 0)
+        self.__cReader = QueuedConnectionReader(self, 0)
+        self.__cWriter = ConnectionWriter(self, 0)
 
     def configure(self):
         if self.socket is None:
@@ -30,7 +30,7 @@ class ServerHandler(QueuedConnectionManager):
             self.cListener.addConnection(self.socket)
 
             taskMgr.add(self.listen_suggestions, "listen-task")
-            taskMgr.add(self.read_data, "read-task")
+            taskMgr.add(self.__read_data, "read-task")
     
     def listen_suggestions(self, task):
         if self.cListener.newConnectionAvailable():
@@ -43,14 +43,14 @@ class ServerHandler(QueuedConnectionManager):
 
                 self.logger.warn("new connection from %s" % str(net_addr))
                 self.active_connections.append(new_conn)
-                self.cReader.addConnection(new_conn)
+                self.__cReader.addConnection(new_conn)
         return task.cont
 
-    def read_data(self, task):
-        if self.cReader.dataAvailable():
+    def __read_data(self, task):
+        if self.__cReader.dataAvailable():
             dg = NetDatagram()
 
-            if self.cReader.getData(dg):
+            if self.__cReader.getData(dg):
                 self.handle_data(dg)
         return task.cont
 

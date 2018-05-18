@@ -4,6 +4,7 @@ from panda3d.core import ConfigVariableString
 ConfigVariableString("window-type", "none").setValue("none")
 from direct.showbase.ShowBase import ShowBase
 
+from server.client_agent.ClientAgent import ClientAgent
 from server.message_director.MessageDirector import MessageDirector
 from lib.logging.Logger import Logger
 
@@ -13,14 +14,18 @@ class ServerStart(ShowBase):
 
     def __init__(self):
         ShowBase.__init__(self)
-        self.start_threads()
-    
-    def start_threads(self):
-        thread.start_new_thread(self.start_md, ("127.0.0.1", 6667))
+        self.start_servers()
 
-    def start_md(self, host, port):
-        md = MessageDirector(host, port)
+    def start_servers(self):
+        host = "127.0.0.1"
+        md_port = 6667
+        ca_port = 6668
+
+        md = MessageDirector(host, md_port)
         md.configure()
+        
+        ca = ClientAgent(host, md_port, ca_port)
+        ca.configure()
 
 
 server = ServerStart()

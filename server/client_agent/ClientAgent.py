@@ -19,6 +19,6 @@ class ClientAgent(ServerBase, SocketConnector):
         SocketConnector.configure(self)
         self.logger.info("server started")
 
-    def handle_data(self, datagram):
+    def __handle_data(self, datagram):
         connection = datagram.getConnection()
         self.__active_interface.__handle_datagram(datagram)

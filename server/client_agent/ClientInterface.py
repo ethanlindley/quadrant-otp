@@ -13,9 +13,13 @@ class ClientInterface(InterfaceObject):
         InterfaceObject.__init__(self, parent, rendezvous, net_addr, conn, our_channel)
 
     def setup(self):
-        if self.__channel is None:
-            self.__channel = channel_types.CLIENT_AGENT_CHANNEL
-            self.__register_for_channel(self.__channel)
+        InterfaceObject.setup(self)
+
+        if self.channel is None:
+            self.channel = self.parent.allocate_channel()
+            self.__register_for_channel(self.channel)
+        
+        self.logger.info("interface started")
 
     def handle_datagram(self, datagram):
         # NOTE - incomplete method

@@ -12,18 +12,22 @@ class MDInterface(InterfaceObject):
     def __init__(self, parent, rendezvous, net_addr, conn, our_channel=None):
         InterfaceObject.__init__(self, parent, rendezvous, net_addr, conn, our_channel)
 
+    def setup(self):
+        InterfaceObject.setup(self)
+        self.logger.info("interface started")
+
     def handle_datagram(self, datagram):
+        connection = datagram.getConnection()
         dgi = PyDatagramIterator(datagram)
         msg = dgi.getUint16()
-        connection = datagram.getConnection()
 
         # make sure the datagram contains data
         if dgi.getRemainingSize() is None:
             return
         
         if msg == msg_types.CONTROL_SET_CHANNEL:
-            channel = dgi.getUint64()
-            self.__parent.register_channel(channel, connection)
+            channel = dgi.getUint16()
+            self.parent.register_channel(channel, connection)
         elif msg == msg_types.CONTROL_REMOVE_CHANNEL:
             self.parent.unregister_channel(channel)
         else:

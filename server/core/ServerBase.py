@@ -17,8 +17,9 @@ class ServerBase(QueuedConnectionManager):
         self.__active_connections = []
 
         self.__interface = interface
-        self.__active_interface = None
         self.__interface_objects = {}
+        self.__registered_interfaces = {}
+        self.__potential_interfaces = []
 
         self.__allocated_channels = []
 
@@ -52,7 +53,9 @@ class ServerBase(QueuedConnectionManager):
 
             if self.__cListener.getNewConnection(rendezvous, net_addr, new_conn):
                 new_conn = new_conn.p()
-                self.__handle_suggestion(rendezvous, net_addr, new_conn)
+                self.__potential_interfaces.append(new_conn)  # to be handled by the MD
+                self.__active_connections.append(new_conn)
+                self.__cReader.addConnection(new_conn)
         
         return task.cont
 
@@ -70,11 +73,11 @@ class ServerBase(QueuedConnectionManager):
         # to be overridden by inheritors
         pass
 
-    def __handle_suggestion(self, rendezvous, net_addr, new_conn):
-        self.__active_interface = self.__interface(self, rendezvous, net_addr, new_conn)  # instantiate a new interface
-        if self.__active_interface.__connection not in self.__interface_objects:
-            self.__interface_objects[self.__active_interface.__connection] = self.__active_interface
-            self.__cReader.addConnection(self.__active_interface.__connection)
+    def __add_interface(self, rendezvous, net_addr, new_conn):
+        interface = self.__interface(self, rendezvous, net_addr, new_conn)  # instantiate a new interface
+        if interface.connection not in self.__interface_objects:
+            self.__interface_objects[interface.connection] = interface
+            self.__cReader.addConnection(interface.connection)
 
     def __allocate_channel(self):
         channel = UniqueIdAllocator(1100, 1500).allocate()

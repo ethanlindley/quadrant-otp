@@ -1,4 +1,4 @@
-from panda3d.core import NetDatagram, UniqueIdAllocator
+from panda3d.core import NetDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
 from .MDInterface import MDInterface
@@ -12,22 +12,22 @@ class MessageDirector(ServerBase):
     def __init__(self, host, port):
         ServerBase.__init__(self, host, port, MDInterface)
 
-        self.channel_allocator = UniqueIdAllocator(1000000000, 1009999999)
+        self.registered_clients = {}
 
     def setup(self):
         ServerBase.configure(self)
         self.logger.info("server started")
 
-    def register_channel(self, channel):
-        # TODO - handle any requests to register a new channel to the MD
-        pass
+    def register_channel(self, channel, connection):
+        if self.registered_clients[channel] is None:
+            self.registered_clients[channel] = connection
+            self.logger.debug("registered new channel - %d" % channel)
 
     def unregister_channel(self, channel):
-        # TODO - handle any requests to unregister a channel from the MD
-        pass
+        if self.registered_clients[channel]:
+            del self.registered_clients[channel]
+            self.logger.debug("unregistered channel - %d" % channel)
 
-    def handle_data(self, dg, connection):
-        dgi = PyDatagramIterator(dg)
-        interface = self.get_interface_from_datagram(dgi.getUint64())
-        dg = interface.handle_datagram(dg)
-        self.cWriter.send(dg, connection)
+    def handle_data(self, datagram):
+        connection = datagram.getConnection()
+        self.__active_interface.__handle_datagram(datagram)

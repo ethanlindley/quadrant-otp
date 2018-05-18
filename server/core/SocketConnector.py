@@ -7,50 +7,49 @@ class SocketConnector(QueuedConnectionManager):
     logger = Logger("socket_connector")
 
     def __init__(self, host, connect_port, timeout=5000):
-        self.host = host
-        self.connect_port = connect_port
-        self.timeout = timeout
+        self.__host = host
+        self.__connect_port = connect_port
+        self.__timeout = timeout
 
-        self.socket = None
+        self.__socket = None
 
-        self.read_task = None
+        self.__read_task = None
 
         QueuedConnectionManager.__init__(self)
-        self.cReader = QueuedConnectionReader(self, 0)
-        self.cWriter = ConnectionWriter(self, 0)
+        self.__cReader = QueuedConnectionReader(self, 0)
+        self.__cWriter = ConnectionWriter(self, 0)
 
     def configure(self):
-        if self.socket:
+        if self.__socket:
             return
 
-        self.socket = self.openTCPClientConnection(self.host, self.connect_port, self.timeout)
-        if self.socket is None:
+        self.__socket = self.openTCPClientConnection(self.__host, self.__connect_port, self.__timeout)
+        if self.__socket is None:
             raise Exception("unable to connect to socket at %s:%s" % (self.host, str(self.port)))
         
-        self.cReader.addConnection(self.socket)  # keep track of connected sockets to their respective listener(s)
+        self.__cReader.addConnection(self.__socket)  # keep track of connected sockets to their respective listener(s)
         
         # poll for incoming data
-        self.read_task = taskMgr.add(self.poll_incoming_data, "read-task")
+        self.__read_task = taskMgr.add(self.__poll_incoming_data, "read-task")
 
-    def poll_incoming_data(self, task):
-        if self.cReader.dataAvailable():
+    def __poll_incoming_data(self, task):
+        if self.__cReader.dataAvailable():
             dg = NetDatagram()
 
             # make sure the dg actually contains data
-            if self.cReader.getData(dg):
-                conn = dg.getConnection()
-                self.handle_data(dg, conn)
+            if self.__cReader.getData(dg):
+                self.__handle_data(dg)
         
         return task.cont
 
-    def handle_data(self, dg, connection):
+    def __handle_data(self, datagram):
         # to be overridden by inheritors
         pass
 
     def shutdown(self):
-        if self.read_task:
-            taskMgr.remove(self.read_task)
-            self.read_task = None
+        if self.__read_task:
+            taskMgr.remove(self.__read_task)
+            self.__read_task = None
             
-            self.closeConnection(self.socket)  # close the reading socket
-            self.socket = None
+            self.__closeConnection(self.__socket)  # close the reading socket
+            self.__socket = None

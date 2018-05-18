@@ -1,6 +1,7 @@
 from panda3d.core import NetDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
+from server.types import MessageTypes as msg_types
 from server.core.InterfaceObject import InterfaceObject
 from lib.logging.Logger import Logger
 
@@ -11,17 +12,19 @@ class MDInterface(InterfaceObject):
     def __init__(self, parent, rendezvous, net_addr, conn, our_channel=None):
         InterfaceObject.__init__(self, parent, rendezvous, net_addr, conn, our_channel)
 
-    def setup(self):
-        if self.channel is None:
-            self.channel = self.parent.channel_allocator.allocate()
-            self.register_for_channel(self.channel)
-
-    def handle_datagram(self, dg):
-        # NOTE - incomplete method
-        dgi = PyDatagramIterator(dg)
+    def handle_datagram(self, datagram):
+        dgi = PyDatagramIterator(datagram)
+        msg = dgi.getUint16()
+        connection = datagram.getConnection()
 
         # make sure the datagram contains data
         if dgi.getRemainingSize() is None:
             return
-        msg = dgi.getUint8()
-        self.logger.debug("received new message - %s" % str(msg))
+        
+        if msg == msg_types.CONTROL_SET_CHANNEL:
+            channel = dgi.getUint64()
+            self.__parent.register_channel(channel, connection)
+        elif msg == msg_types.CONTROL_REMOVE_CHANNEL:
+            self.parent.unregister_channel(channel)
+        else:
+            self.logger.debug("received unimplemented message type - %s" % str(msg))

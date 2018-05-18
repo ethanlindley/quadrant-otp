@@ -27,6 +27,7 @@ class ServerHandler(QueuedConnectionManager):
             self.socket = self.openTCPServerRendezvous(self.host, self.port, self.backlog)
             if self.socket is None:
                 raise Exception("unable to open new socket at %s:%d" % (self.host, self.port))
+            self.cListener.addConnection(self.socket)
 
             taskMgr.add(self.listen_suggestions, "listen-task")
             taskMgr.add(self.read_data, "read-task")
@@ -35,13 +36,14 @@ class ServerHandler(QueuedConnectionManager):
         if self.cListener.newConnectionAvailable():
             rendezvous = PointerToConnection()
             net_addr = NetAddress()
-            new_conn = NewConnection()
+            new_conn = PointerToConnection()
 
             if self.cListener.getNewConnection(rendezvous, net_addr, new_conn):
                 new_conn = new_conn.p()
+
+                self.logger.warn("new connection from %s" % str(net_addr))
                 self.active_connections.append(new_conn)
                 self.cReader.addConnection(new_conn)
-                self.logger.warn("new connection from %s" % str(new_conn))
         return task.cont
 
     def read_data(self, task):

@@ -51,7 +51,7 @@ class CAHandler(PacketHandler, ConnectionHandler):
         if msg == msg_types.CLIENT_HEARTBEAT:
             self.handle_client_heartbeat(dgi)
         elif msg == msg_types.CLIENT_LOGIN_3:
-            self.handle_client_login(connection)
+            self.handle_client_login(dgi, connection)
         elif msg == msg_types.CLIENT_SET_AVTYPE:
             self.handle_client_set_avtype(dgi, connection)
         elif msg == msg_types.CLIENT_ADD_INTEREST:
@@ -65,9 +65,25 @@ class CAHandler(PacketHandler, ConnectionHandler):
         # TODO - handle and keep track of client heartbeats
         self.logger.debug("received client heartbeat")
 
-    def handle_client_login(self, connection):
+    def handle_client_login(self, dgi, connection):
+        token = dgi.getString()
+
         dg = PyDatagram()
         dg.addUint16(msg_types.CLIENT_LOGIN_3_RESP)
+        dg.addUint8(0)  # returnCode
+        dg.addString("")  # errorString
+
+        # account details 
+        dg.addString(token)  # username
+        dg.addUint8(1)  # canChat
+        dg.addUint32(00000)  # sec
+        dg.addUint32(00000)  # usec 
+        dg.addUint8(1)  # isPaid                
+        dg.addInt32(00000)  # minutesRemaining
+        dg.addString('dev')
+        dg.addString('YES')
+        dg.addInt32(00000)  # LastLogin
+
         self.cWriter.send(dg, connection)
 
     def handle_client_set_avtype(self, dgi, connection):

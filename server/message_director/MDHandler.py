@@ -33,6 +33,8 @@ class MDHandler(PacketHandler, SocketHandler):
         elif msg == msg_types.CONTROL_REMOVE_CHANNEL:
             channel = dgi.getUint16()
             self.unregister_channel(channel)
+        else:
+            self.logger.warn("received unimplemented message type - %d" % msg)
 
     def register_channel(self, channel, connection):
         if channel not in self.registered_channels:

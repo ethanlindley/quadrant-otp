@@ -59,7 +59,7 @@ class CAHandler(PacketHandler, SocketHandler):
         elif msg == msg_types.CLIENT_DISCONNECT:
             self.handle_client_disconnect(dgi, connection)
         else:
-            self.logger.warn("received unimplemented message - %d" % msg)
+            self.logger.warn("received unimplemented message type - %d" % msg)
 
     def handle_client_heartbeat(self, dgi):
         # TODO - handle and keep track of client heartbeats

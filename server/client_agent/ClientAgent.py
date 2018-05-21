@@ -1,23 +1,21 @@
 from panda3d.core import NetAddress, PointerToConnection
 
 from .CAHandler import CAHandler
-from server.handlers.ConnectionHandler import ConnectionHandler
-from server.handlers.ServerHandler import ServerHandler
+from server.handlers.SocketHandler import SocketHandler
 from lib.logging.Logger import Logger
 
 
-class ClientAgent(ServerHandler, ConnectionHandler):
+class ClientAgent(SocketHandler):
     logger = Logger("client_agent")
 
-    def __init__(self, host, port, ca_port):
-        ServerHandler.__init__(self, host, ca_port)
-        ConnectionHandler.__init__(self, host, port)
+    def __init__(self, port=6667, host=6660):
+        SocketHandler.__init__(self, port, host)
 
     def configure(self):
-        ServerHandler.configure(self)
-        ConnectionHandler.configure(self)
+        SocketHandler.setup_socket(self)
+        SocketHandler.connect_socket(self)
         self.logger.info("server online")
-        self.handler = CAHandler(self.md_host, self.md_port)  # instantiate our handler
+        self.handler = CAHandler(self.host)  # instantiate our handler
 
     def listen_suggestions(self, task):
         if self.cListener.newConnectionAvailable():
@@ -30,8 +28,12 @@ class ClientAgent(ServerHandler, ConnectionHandler):
 
                 self.logger.warn("new connection from %s" % str(net_addr))
                 self.active_connections.append(new_conn)
-                self.handler.setup_new_connection(new_conn)
                 self.cReader.addConnection(new_conn)
+
+                try:
+                    self.handler.setup_new_connection(new_conn)
+                except:
+                    pass
         return task.cont
 
     def handle_data(self, dg):

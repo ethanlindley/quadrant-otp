@@ -1,20 +1,20 @@
 from panda3d.core import NetAddress, PointerToConnection
 
 from .MDHandler import MDHandler
-from server.handlers.ServerHandler import ServerHandler
+from server.handlers.SocketHandler import SocketHandler
 from lib.logging.Logger import Logger
 
 
-class MessageDirector(ServerHandler):
+class MessageDirector(SocketHandler):
     logger = Logger("message_director")
 
-    def __init__(self, host, port):
-        ServerHandler.__init__(self, host, port)
+    def __init__(self, port=6660, host=None):
+        SocketHandler.__init__(self, port, host)
     
     def configure(self):
-        ServerHandler.configure(self)
+        SocketHandler.setup_socket(self)
         self.logger.info("server online")
-        self.handler = MDHandler(self.host, self.port)  # instantiate our handler
+        self.handler = MDHandler(self.host)  # instantiate our handler
 
     def listen_suggestions(self, task):
         if self.cListener.newConnectionAvailable():

@@ -21,10 +21,10 @@ class ServerStart(ShowBase):
         md_port = 6660
         ca_port = 6667
 
-        md = MessageDirector(host, md_port)
+        md = MessageDirector(md_port)
         md.configure()
         
-        ca = ClientAgent(host, md_port, ca_port)
+        ca = ClientAgent(ca_port, md_port)
         ca.configure()
 
 

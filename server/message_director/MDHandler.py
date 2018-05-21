@@ -1,24 +1,23 @@
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
 from server.types import MessageTypes as msg_types
-from server.handlers.ConnectionHandler import ConnectionHandler
+from server.handlers.SocketHandler import SocketHandler
 from server.handlers.PacketHandler import PacketHandler
 from lib.logging.Logger import Logger
 
 
-class MDHandler(PacketHandler, ConnectionHandler):
+class MDHandler(PacketHandler, SocketHandler):
     logger = Logger("md_handler")
 
-    def __init__(self, host, port):
-        PacketHandler.__init__(self)
-        ConnectionHandler.__init__(self, host, port)
-
+    def __init__(self, port=None, host=6660):
         self.registered_channels = {}
 
+        PacketHandler.__init__(self)
+        SocketHandler.__init__(self, port, host)
         self.configure()
 
     def configure(self):
-        ConnectionHandler.configure(self)
+        SocketHandler.connect_socket(self)
         self.logger.info("handler online")
 
     def handle_packet(self, dg):

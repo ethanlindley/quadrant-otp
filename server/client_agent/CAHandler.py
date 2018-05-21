@@ -2,23 +2,23 @@ from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
 from server.types import MessageTypes as msg_types
-from server.handlers.ConnectionHandler import ConnectionHandler
+from server.handlers.SocketHandler import SocketHandler
 from server.handlers.PacketHandler import PacketHandler
 from lib.logging.Logger import Logger
 
 
-class CAHandler(PacketHandler, ConnectionHandler):
+class CAHandler(PacketHandler, SocketHandler):
     logger = Logger("ca_handler")
 
-    def __init__(self, host, port):
+    def __init__(self, port=None, host=6660):
         self.active_clients = {}
 
         PacketHandler.__init__(self)
-        ConnectionHandler.__init__(self, host, port)
+        SocketHandler.__init__(self, port, host)
         self.configure()
 
     def configure(self):
-        ConnectionHandler.configure(self)
+        SocketHandler.connect_socket(self)
         self.logger.info("handler online")
 
         if self.our_channel is None:
@@ -34,13 +34,13 @@ class CAHandler(PacketHandler, ConnectionHandler):
         dg = PyDatagram()
         dg.addUint16(msg_types.CONTROL_SET_CHANNEL)
         dg.addUint64(channel)
-        self.cWriter.send(dg, self.client_socket)
+        self.cWriter.send(dg, self.connection)
 
     def unregister_channel(self, channel):
         dg = PyDatagram()
         dg.addUint16(msg_types.CONTROL_REMOVE_CHANNEL)
         dg.addUint64(channel)
-        self.cWriter.send(dg, self.client_socket)
+        self.cWriter.send(dg, self.connection)
 
     def handle_packet(self, dg):
         connection = dg.getConnection()

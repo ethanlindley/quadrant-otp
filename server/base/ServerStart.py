@@ -18,8 +18,8 @@ class ServerStart(ShowBase):
 
     def start_servers(self):
         host = "127.0.0.1"
-        md_port = 6667
-        ca_port = 6668
+        md_port = 6660
+        ca_port = 6667
 
         md = MessageDirector(host, md_port)
         md.configure()

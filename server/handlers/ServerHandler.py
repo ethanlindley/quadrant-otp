@@ -20,7 +20,7 @@ class ServerHandler(QueuedConnectionManager):
         QueuedConnectionManager.__init__(self)
         self.cListener = QueuedConnectionListener(self, 0)
         self.cReader = QueuedConnectionReader(self, 0)
-        self.__cWriter = ConnectionWriter(self, 0)
+        self.cWriter = ConnectionWriter(self, 0)
 
     def configure(self):
         if self.socket is None:

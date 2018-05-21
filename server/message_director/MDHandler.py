@@ -13,7 +13,7 @@ class MDHandler(PacketHandler, ConnectionHandler):
         PacketHandler.__init__(self)
         ConnectionHandler.__init__(self, host, port)
 
-        self.registered_handlers = {}
+        self.registered_channels = {}
 
         self.configure()
 
@@ -36,11 +36,11 @@ class MDHandler(PacketHandler, ConnectionHandler):
             self.unregister_channel(channel)
 
     def register_channel(self, channel, connection):
-        if channel not in self.registered_handlers:
-            self.registered_handlers[channel] = connection
+        if channel not in self.registered_channels:
+            self.registered_channels[channel] = connection
             self.logger.debug("registered new channel - %d" % channel)
         
     def unregister_channel(self, channel):
-        if self.registered_handlers[channel]:
-            del self.registered_handlers[channel]
+        if self.registered_channels[channel]:
+            del self.registered_channels[channel]
             self.logger.debug("unregistered channel - %d" % channel)

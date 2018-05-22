@@ -1,3 +1,4 @@
+from panda3d.core import UniqueIdAllocator
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
@@ -12,6 +13,7 @@ class CAHandler(PacketHandler, SocketHandler):
 
     def __init__(self, port=None, host=6660):
         self.active_clients = {}
+        self.allocate_channel = UniqueIdAllocator(1000000, 1999999)
 
         PacketHandler.__init__(self)
         SocketHandler.__init__(self, port, host)
@@ -20,10 +22,6 @@ class CAHandler(PacketHandler, SocketHandler):
     def configure(self):
         SocketHandler.connect_socket(self)
         self.logger.info("handler online")
-
-        if self.our_channel is None:
-            self.our_channel = self.allocate_channel.allocate()
-            self.register_channel(self.our_channel)
 
     def setup_new_connection(self, connection):
         channel = self.allocate_channel.allocate()
@@ -50,7 +48,7 @@ class CAHandler(PacketHandler, SocketHandler):
         # begin handling messages here
         if msg == msg_types.CLIENT_HEARTBEAT:
             self.handle_client_heartbeat(dgi)
-        elif msg == msg_types.CLIENT_LOGIN_3:
+        elif msg == msg_types.CLIENT_LOGIN_2:
             self.handle_client_login(dgi, connection)
         elif msg == msg_types.CLIENT_SET_AVTYPE:
             self.handle_client_set_avtype(dgi, connection)
@@ -71,37 +69,6 @@ class CAHandler(PacketHandler, SocketHandler):
         token = dgi.getString()
         self.logger.debug("logging in user %s" % token)
 
-        dg = PyDatagram()
-        dg.addUint16(msg_types.CLIENT_LOGIN_3_RESP)
-        dg.addUint8(0)  # returnCode
-        dg.addString("")  # errorString
-
-        # begin account details
-        dg.addString("YES")  # openChatEnabled
-        dg.addString("YES")  # createFriendsWithChat
-        dg.addString("YES")  # chatCodeCreation
-        dg.addString("VELVET")  # access
-        dg.addInt32(1)  # familyAccId
-        dg.addInt32(1)  # playerAccId
-        dg.addString(token)  # playerName
-        dg.addInt8(0)  # playerNameApproved
-        dg.addInt32(4)  # maxAvatars
-
-        # begin subAccount details
-        dg.addUint16(1)  # numSubs
-        dg.addUint32(1)  # subId
-        dg.addUint32(1)  # subOwnerId
-        dg.addString(token)  # subName
-        dg.addString("YES")  # subActive
-        dg.addString("VELVET")  # subAccess
-        dg.addUint8(0)  # subLevel
-        dg.addUint8(1)  # subNumAvatars
-        dg.addUint8(0)  # subNumConcur
-        dg.addString("YES")  # subFounder
-        dg.addString("YES")  # WLChatEnabled
-
-        self.cWriter.send(dg, connection)
-
     def handle_client_set_avtype(self, dgi, connection):
         # TODO - setup avatar types dynamically
         self.logger.debug("received SET_AVTYPE")
@@ -115,8 +82,5 @@ class CAHandler(PacketHandler, SocketHandler):
         self.logger.debug("received ADD_INTEREST - (%d, %d, %d, %s)" % (handle, contextId, parentId, zoneList))
 
     def handle_client_disconnect(self, dgi, connection):
+        # TODO - unregister channels
         self.logger.warn("client from %s has disconnected" % str(connection))
-        for client in self.active_clients:
-            if self.active_clients[client] == connection:
-                self.unregister_channel(client)
-                del self.active_clients[client]

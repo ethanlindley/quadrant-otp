@@ -5,3 +5,7 @@ Quadrant-OTP is an experimental server suite for Panda3D client applications, wi
 ## Requirements
 
 You must have the latest build of the Panda3D SDK installed, of which can be found [here](https://www.panda3d.org/download.php?sdk&version=&version=1.9.4 "Panda3D 1.9.4 SDK").
+
+## Contributing
+
+Any contributions are more than welcomed! Feel free to fork the repository, make some changes and submit a Pull Request. I'll be sure to review any PRs that are submitted to the repository.

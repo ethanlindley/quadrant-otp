@@ -50,10 +50,6 @@ class CAHandler(PacketHandler, SocketHandler):
             self.handle_client_heartbeat(dgi)
         elif msg == msg_types.CLIENT_LOGIN_2:
             self.handle_client_login(dgi, connection)
-        elif msg == msg_types.CLIENT_SET_AVTYPE:
-            self.handle_client_set_avtype(dgi, connection)
-        elif msg == msg_types.CLIENT_ADD_INTEREST:
-            self.handle_add_interest(dgi, connection)
         elif msg == msg_types.CLIENT_DISCONNECT:
             self.handle_client_disconnect(dgi, connection)
         else:
@@ -65,21 +61,26 @@ class CAHandler(PacketHandler, SocketHandler):
 
     def handle_client_login(self, dgi, connection):
         # TODO - dynamically set user info from the DBServer
-
         token = dgi.getString()
         self.logger.debug("logging in user %s" % token)
 
-    def handle_client_set_avtype(self, dgi, connection):
-        # TODO - setup avatar types dynamically
-        self.logger.debug("received SET_AVTYPE")
+        # TODO - sanity checks
+        serverVersion = dgi.getString()
+        hashVal = dgi.getInt32()
+        
+        dg = PyDatagram()
+        dg.addUint16(msg_types.CLIENT_LOGIN_2_RESP)
+        dg.addUint8(0)  # returnCode
+        dg.addString("")  # errorString
 
-    def handle_add_interest(self, dgi, connection):
-        # TODO - setup interests
-        handle = dgi.getUint16()  # interest ID
-        contextId = dgi.getUint32()
-        parentId = dgi.getUint32()  # related object
-        zoneList = [dgi.getUint32()]  # zone to create object in
-        self.logger.debug("received ADD_INTEREST - (%d, %d, %d, %s)" % (handle, contextId, parentId, zoneList))
+        # begin account details
+        dg.addString(token)  # username
+        dg.addUint8(0)  # secretChatAllowed
+        dg.addUint32(0)  # sec
+        dg.addUint32(0)  # usec
+        dg.addUint8(1)  # isPaid
+
+        self.cWriter.send(dg, connection)
 
     def handle_client_disconnect(self, dgi, connection):
         # TODO - unregister channels

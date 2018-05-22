@@ -66,30 +66,45 @@ class CAHandler(PacketHandler, SocketHandler):
         self.logger.debug("received client heartbeat")
 
     def handle_client_login(self, dgi, connection):
+        # TODO - dynamically set user info from the DBServer
+
         token = dgi.getString()
+        self.logger.debug("logging in user %s" % token)
 
         dg = PyDatagram()
         dg.addUint16(msg_types.CLIENT_LOGIN_3_RESP)
         dg.addUint8(0)  # returnCode
         dg.addString("")  # errorString
 
-        # account details 
-        dg.addString(token)  # username
-        dg.addUint8(1)  # canChat
-        dg.addUint32(00000)  # sec
-        dg.addUint32(00000)  # usec 
-        dg.addUint8(1)  # isPaid                
-        dg.addInt32(00000)  # minutesRemaining
-        dg.addString('dev')
-        dg.addString('YES')
-        dg.addInt32(00000)  # LastLogin
+        # begin account details
+        dg.addString("YES")  # openChatEnabled
+        dg.addString("YES")  # createFriendsWithChat
+        dg.addString("YES")  # chatCodeCreation
+        dg.addString("VELVET")  # access
+        dg.addInt32(1)  # familyAccId
+        dg.addInt32(1)  # playerAccId
+        dg.addString(token)  # playerName
+        dg.addInt8(0)  # playerNameApproved
+        dg.addInt32(4)  # maxAvatars
+
+        # begin subAccount details
+        dg.addUint16(1)  # numSubs
+        dg.addUint32(1)  # subId
+        dg.addUint32(1)  # subOwnerId
+        dg.addString(token)  # subName
+        dg.addString("YES")  # subActive
+        dg.addString("VELVET")  # subAccess
+        dg.addUint8(0)  # subLevel
+        dg.addUint8(1)  # subNumAvatars
+        dg.addUint8(0)  # subNumConcur
+        dg.addString("YES")  # subFounder
+        dg.addString("YES")  # WLChatEnabled
 
         self.cWriter.send(dg, connection)
 
     def handle_client_set_avtype(self, dgi, connection):
         # TODO - setup avatar types dynamically
-        avId = dgi.getUint32()
-        self.logger.debug("received SET_AVTYPE for avId %d" % avId)
+        self.logger.debug("received SET_AVTYPE")
 
     def handle_add_interest(self, dgi, connection):
         # TODO - setup interests

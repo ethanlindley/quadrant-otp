@@ -1,3 +1,5 @@
+import time
+
 from panda3d.core import UniqueIdAllocator
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
@@ -76,8 +78,8 @@ class CAHandler(PacketHandler, SocketHandler):
         # begin account details
         dg.addString(token)  # username
         dg.addUint8(0)  # secretChatAllowed
-        dg.addUint32(0)  # sec
-        dg.addUint32(0)  # usec
+        dg.addUint32(int(time.time()))  # sec
+        dg.addUint32(int(time.clock()))  # usec
         dg.addUint8(1)  # isPaid
 
         self.cWriter.send(dg, connection)
